@@ -1,7 +1,5 @@
 package com.swarga.Kartwala.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.swarga.Kartwala.model.Category;
+import com.swarga.Kartwala.payload.CategoryDTO;
+import com.swarga.Kartwala.payload.CategoryResponse;
 import com.swarga.Kartwala.service.CategoryService;
+
+import jakarta.validation.Valid;
 
 @RestController
 public class CategoryController {
@@ -24,43 +25,35 @@ public class CategoryController {
 	private CategoryService categoryService;
 	
 	@GetMapping("/api/public/categories")
-	public ResponseEntity<List<Category>> getAllCategories(){
+	public ResponseEntity<CategoryResponse> getAllCategories(){
 		
 		//Get all categories
-		 List<Category> categories = categoryService.getAllCategories();
-		 return new ResponseEntity<List<Category>>(categories, HttpStatus.OK);
+		 CategoryResponse categoryResponse = categoryService.getAllCategories();
+		 return new ResponseEntity<CategoryResponse>(categoryResponse, HttpStatus.OK);
 	}
 	
 	@PostMapping("/api/admin/category")
-	public ResponseEntity<String> createCategory(@RequestBody Category category) {
+	public ResponseEntity<CategoryDTO> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
 		
 		//Create a new category
-		Long categoryId = categoryService.createCategory(category);
-		return new ResponseEntity<String>("New category with Id: "+categoryId+" created!!", HttpStatus.CREATED);
+		CategoryDTO savedCategoryDTO = categoryService.createCategory(categoryDTO);
+		return new ResponseEntity<CategoryDTO>(savedCategoryDTO, HttpStatus.CREATED);
 	}
 	@DeleteMapping("/api/admin/categories/{categoryId}")
 	public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId) {
 		
 		//Delete a category
-		try {
-			String status = categoryService.deleteCategory(categoryId);
-			return new ResponseEntity<String>(status, HttpStatus.OK);
-		}catch (ResponseStatusException e) {
-			return new ResponseEntity<String>(e.getReason(), e.getStatusCode());
-		}
+		String status = categoryService.deleteCategory(categoryId);
+		return new ResponseEntity<String>(status, HttpStatus.OK);
 		
 	}
 	@PutMapping("/api/admin/categories/{categoryId}")
-	public ResponseEntity<String> updateCategory(@RequestBody Category category,@PathVariable Long categoryId) {
+	public ResponseEntity<String> updateCategory(@Valid @RequestBody Category category,@PathVariable Long categoryId) {
 		
 		//Update a category
-		try {
-			Category updatedCategory = categoryService.updateCategory(category, categoryId);
-			String status="Category with Id: "+updatedCategory.getCategoryId()+" updated successfully!!";
-			return new ResponseEntity<String>(status, HttpStatus.OK);
-		}catch (ResponseStatusException e) {
-			return new ResponseEntity<String>(e.getReason(), e.getStatusCode());
-		}
+		Category updatedCategory = categoryService.updateCategory(category, categoryId);
+		String status="Category with Id: "+updatedCategory.getCategoryId()+" updated successfully!!";
+		return new ResponseEntity<String>(status, HttpStatus.OK);
 		
 	}
 }
