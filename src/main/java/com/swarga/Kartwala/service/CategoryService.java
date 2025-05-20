@@ -1,13 +1,12 @@
 package com.swarga.Kartwala.service;
 
-import com.swarga.Kartwala.model.Category;
 import com.swarga.Kartwala.payload.CategoryDTO;
 import com.swarga.Kartwala.payload.CategoryResponse;
 
 public interface CategoryService {
 	
-	CategoryResponse getAllCategories();
+	CategoryResponse getAllCategories(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 	CategoryDTO createCategory(CategoryDTO categoryDTO);
-	String deleteCategory(Long categoryId);
-	Category updateCategory(Category category, Long categoryId);
+	CategoryDTO deleteCategory(Long categoryId);
+	CategoryDTO updateCategory(CategoryDTO categoryDTO, Long categoryId);
 }

@@ -12,6 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.swarga.Kartwala.payload.APIResponse;
+
 @RestControllerAdvice
 public class MyExceptionHandler {
 	
@@ -38,15 +40,17 @@ public class MyExceptionHandler {
 	}
 	
 	@ExceptionHandler(ResourceNotFoundException.class)
-	public ResponseEntity<String> myResourceNotFoundExceptionHandler(ResourceNotFoundException e){
+	public ResponseEntity<APIResponse> myResourceNotFoundExceptionHandler(ResourceNotFoundException e){
 		String message=e.getMessage();
-		return new ResponseEntity<String>(message,HttpStatus.NOT_FOUND);
+		APIResponse apiResponse = new APIResponse(message, false);
+		return new ResponseEntity<APIResponse>(apiResponse,HttpStatus.NOT_FOUND);
 	}
 	
 	@ExceptionHandler(APIException.class)
-	public ResponseEntity<String> myAPIExceptionHandler(APIException e){
+	public ResponseEntity<APIResponse> myAPIExceptionHandler(APIException e){
 		String message=e.getMessage();
-		return new ResponseEntity<String>(message,HttpStatus.BAD_REQUEST);
+		APIResponse apiResponse = new APIResponse(message, false);
+		return new ResponseEntity<APIResponse>(apiResponse,HttpStatus.BAD_REQUEST);
 	}
 
 }
