@@ -7,4 +7,5 @@ public class AppConstants {
 	public static final String DEFAULT_SORT_CATEGORY_BY = "categoryId";
 	public static final String DEFAULT_SORT_DIRECTION = "asc";
 
+	public static final String DEFAULT_SORT_PRODUCT_BY ="productId" ;
 }
