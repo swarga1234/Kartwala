@@ -53,4 +53,10 @@ public class MyExceptionHandler {
 		return new ResponseEntity<APIResponse>(apiResponse,HttpStatus.BAD_REQUEST);
 	}
 
+	public ResponseEntity<APIResponse> myFileNotUploadedException(FileNotUploadedException e){
+		String message = e.getMessage();
+		APIResponse apiResponse = new APIResponse(message,false);
+		return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
 }

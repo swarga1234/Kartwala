@@ -1,5 +1,6 @@
 package com.swarga.Kartwala.service;
 
+import com.swarga.Kartwala.config.AppConstants;
 import com.swarga.Kartwala.exception.APIException;
 import com.swarga.Kartwala.exception.ResourceNotFoundException;
 import com.swarga.Kartwala.model.Category;
@@ -10,11 +11,13 @@ import com.swarga.Kartwala.repository.CategoryRepository;
 import com.swarga.Kartwala.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -30,13 +33,18 @@ public class ProductServiceImpl implements ProductService{
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private FileService fileService;
+
+    @Value("${project.product.image}")
+    private String productImageDir;
+
     @Override
     public ProductDTO addProduct(Long categoryId, ProductDTO productDTO) {
-
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow( () -> new ResourceNotFoundException("Category", "categoryId", categoryId));
         Product product = modelMapper.map(productDTO, Product.class);
-        product.setImage("default.png");
+        product.setImage(AppConstants.DEFAULT_PRODUCT_IMAGE);
         product.setCategory(category);
         product.setSpecialPrice(product.getPrice()- (product.getDiscount()/100)*product.getPrice());
         Product savedProduct = productRepository.save(product);
@@ -140,6 +148,16 @@ public class ProductServiceImpl implements ProductService{
                 .orElseThrow( () -> new ResourceNotFoundException("Product", "productId", productId));
         productRepository.delete(existingProduct);
         return modelMapper.map(existingProduct,ProductDTO.class);
+    }
+
+    @Override
+    public ProductDTO updateProductImage(Long productId, MultipartFile productImage) {
+        Product existingProduct = productRepository.findById(productId)
+                .orElseThrow( () -> new ResourceNotFoundException("Product", "productId", productId));
+        String filename = fileService.uploadImage(productImageDir, productImage); //Update image to server
+        existingProduct.setImage(filename);
+        Product updatedProduct = productRepository.save(existingProduct);
+        return modelMapper.map(updatedProduct, ProductDTO.class);
     }
 
 }

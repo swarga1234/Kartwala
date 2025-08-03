@@ -1,16 +1,17 @@
 package com.swarga.Kartwala.controller;
 
 import com.swarga.Kartwala.config.AppConstants;
-import com.swarga.Kartwala.model.Product;
 import com.swarga.Kartwala.payload.ProductDTO;
 import com.swarga.Kartwala.payload.ProductResponse;
 import com.swarga.Kartwala.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api")
@@ -21,7 +22,7 @@ public class ProductController {
 
     //API to add a product
     @PostMapping("/admin/categories/{categoryId}/product")
-    public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO productDTO, @PathVariable Long categoryId){
+    public ResponseEntity<ProductDTO> addProduct(@Valid @RequestBody ProductDTO productDTO, @PathVariable Long categoryId){
         ProductDTO savedProductDTO = productService.addProduct(categoryId, productDTO);
         return new ResponseEntity<>(savedProductDTO, HttpStatus.CREATED);
     }
@@ -65,7 +66,7 @@ public class ProductController {
 
     //API to update a Product
     @PutMapping("/admin/products/{productId}")
-    public ResponseEntity<ProductDTO> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable Long productId){
+    public ResponseEntity<ProductDTO> updateProduct(@Valid @RequestBody ProductDTO productDTO, @PathVariable Long productId){
 
         ProductDTO updatedProductDTO = productService.updateProduct(productId, productDTO);
         return new ResponseEntity<>(updatedProductDTO, HttpStatus.OK);
@@ -76,5 +77,12 @@ public class ProductController {
     public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long productId){
         ProductDTO deletedProductDTO = productService.deleteProduct(productId);
         return new ResponseEntity<>(deletedProductDTO,HttpStatus.OK);
+    }
+
+    @PutMapping("/admin/products/{productId}/image")
+    public ResponseEntity<ProductDTO> updateProductImage(@PathVariable Long productId,
+                                                         @RequestParam( name = "productImage", defaultValue = AppConstants.DEFAULT_PRODUCT_IMAGE, required = false)MultipartFile productImage) {
+       ProductDTO updateProductDTO= productService.updateProductImage(productId, productImage);
+        return new ResponseEntity<>(updateProductDTO, HttpStatus.OK);
     }
 }

@@ -8,4 +8,5 @@ public class AppConstants {
 	public static final String DEFAULT_SORT_DIRECTION = "asc";
 
 	public static final String DEFAULT_SORT_PRODUCT_BY ="productId" ;
+	public static final String DEFAULT_PRODUCT_IMAGE = "default.png";
 }

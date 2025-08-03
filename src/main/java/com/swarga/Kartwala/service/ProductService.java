@@ -2,6 +2,7 @@ package com.swarga.Kartwala.service;
 
 import com.swarga.Kartwala.payload.ProductDTO;
 import com.swarga.Kartwala.payload.ProductResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ProductService {
     ProductDTO addProduct(Long categoryId, ProductDTO productDTO);
@@ -15,4 +16,6 @@ public interface ProductService {
     ProductDTO updateProduct(Long productId, ProductDTO productDTO);
 
     ProductDTO deleteProduct(Long productId);
+
+    ProductDTO updateProductImage(Long productId, MultipartFile productImage);
 }
