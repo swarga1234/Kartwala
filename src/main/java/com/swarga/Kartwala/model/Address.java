@@ -30,7 +30,7 @@ public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "address_id")
-    private int addressId;
+    private Long addressId;
     @Column(name = "building_name")
     @NotBlank
     @Size(max = 255, message = "Building name can't have more than 255 characters")

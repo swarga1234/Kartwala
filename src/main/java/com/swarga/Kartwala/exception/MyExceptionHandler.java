@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -53,10 +54,25 @@ public class MyExceptionHandler {
 		return new ResponseEntity<APIResponse>(apiResponse,HttpStatus.BAD_REQUEST);
 	}
 
+	@ExceptionHandler(FileNotUploadedException.class)
 	public ResponseEntity<APIResponse> myFileNotUploadedException(FileNotUploadedException e){
 		String message = e.getMessage();
 		APIResponse apiResponse = new APIResponse(message,false);
 		return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<APIResponse> myAuthenticationExceptionHandler(AuthenticationException e){
+		String message = e.getMessage();
+		APIResponse apiResponse = new APIResponse(message, false);
+		return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
+	}
+
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<APIResponse> myUserNotFoundException(UserNotFoundException e){
+		String message = e.getMessage();
+		APIResponse apiResponse = new APIResponse(message, false);
+		return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
 	}
 
 }

@@ -27,7 +27,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private int userId;
+    private Long userId;
 
     @NotBlank
     @Size(max = 50, message = "The email Id can't have more than 50 characters!!")
