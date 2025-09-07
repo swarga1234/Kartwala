@@ -3,12 +3,17 @@ package com.swarga.Kartwala.service;
 import com.swarga.Kartwala.config.AppConstants;
 import com.swarga.Kartwala.exception.APIException;
 import com.swarga.Kartwala.exception.ResourceNotFoundException;
+import com.swarga.Kartwala.model.Cart;
 import com.swarga.Kartwala.model.Category;
 import com.swarga.Kartwala.model.Product;
+import com.swarga.Kartwala.payload.CartDTO;
 import com.swarga.Kartwala.payload.ProductDTO;
 import com.swarga.Kartwala.payload.ProductResponse;
+import com.swarga.Kartwala.repository.CartRepository;
 import com.swarga.Kartwala.repository.CategoryRepository;
 import com.swarga.Kartwala.repository.ProductRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,10 +36,19 @@ public class ProductServiceImpl implements ProductService{
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Value("${project.product.image}")
     private String productImageDir;
@@ -139,14 +153,42 @@ public class ProductServiceImpl implements ProductService{
         double specialPrice = productDTO.getPrice() - (productDTO.getDiscount()/100)* productDTO.getPrice();
         existingProduct.setSpecialPrice(specialPrice);
         Product updatedProduct = productRepository.save(existingProduct);
+        //When product is updated, it should also reflect in the products added to the user carts.
+        // Like if there is a increase in price of the product, so if the product is added to the user's cart,
+        // there also this increased price should be reflected.
+
+        //Fetch all the carts where this product is added
+        List<Cart> carts = cartRepository.findCartsByProductId(productId);
+        //Convert it to DTO
+        List<CartDTO> cartDTOs = carts.stream().map(
+                cart -> {
+                    CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+                    List<ProductDTO> productDTOS = cart.getCartItems().stream().map(
+                            item -> {
+                                ProductDTO pDTO = modelMapper.map(item.getProduct(), ProductDTO.class);
+                                pDTO.setQuantity(item.getQuantity());
+                                return pDTO;
+                            }
+                    ).toList();
+                    cartDTO.setProducts(productDTOS);
+                    return cartDTO;
+                }
+        ).toList();
+        cartDTOs.forEach(cartDTO -> cartService.updateProductInCart(cartDTO.getCartId(), productId));
         return modelMapper.map(updatedProduct, ProductDTO.class);
     }
 
+    @Transactional
     @Override
     public ProductDTO deleteProduct(Long productId) {
         Product existingProduct = productRepository.findById(productId)
                 .orElseThrow( () -> new ResourceNotFoundException("Product", "productId", productId));
-        productRepository.delete(existingProduct);
+        List<Cart> carts = cartRepository.findCartsByProductId(productId);
+        carts.forEach(cart -> {
+            cartService.deleteProductFromCart(cart.getCartId(), productId);
+        });
+//        entityManager.flush();
+        productRepository.deleteById(existingProduct.getProductId());
         return modelMapper.map(existingProduct,ProductDTO.class);
     }
 

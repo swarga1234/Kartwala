@@ -73,4 +73,8 @@ public class User {
         will ensure that the orphans are deleted when the entity is deleted.
      */
     private Set<Product> products = new HashSet<>();
+
+    @ToString.Exclude
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    private Cart cart;
 }

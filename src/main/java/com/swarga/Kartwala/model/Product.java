@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "products")
 @Data
@@ -48,6 +51,9 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "seller_id")
-    @NotNull(message = "The seller can't be null!!")
+//    @NotNull(message = "The seller can't be null!!")
     private User user;
+
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    private List<CartItem> cartItems = new ArrayList<>();
 }
