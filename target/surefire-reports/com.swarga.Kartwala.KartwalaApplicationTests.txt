@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.swarga.Kartwala.KartwalaApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 19.41 s -- in com.swarga.Kartwala.KartwalaApplicationTests

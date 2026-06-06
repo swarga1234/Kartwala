@@ -41,7 +41,7 @@ public class JwtUtils {
             return bearerToken.substring(7);
         }else {
             logger.error("Token not passed properly!!");
-            throw new IllegalArgumentException("Token not passed properly!!");
+            return null;
         }
     }
 

@@ -5,6 +5,8 @@ import com.swarga.Kartwala.exception.ResourceNotFoundException;
 import com.swarga.Kartwala.model.*;
 import com.swarga.Kartwala.payload.OrderDTO;
 import com.swarga.Kartwala.payload.OrderItemDTO;
+import com.swarga.Kartwala.payload.PaymentDTO;
+import com.swarga.Kartwala.payload.ProductDTO;
 import com.swarga.Kartwala.repository.*;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -91,7 +93,8 @@ public class OrderServiceImpl implements OrderService{
         orderItems = orderItemRepository.saveAll(orderItems);
 
         //Update product stock
-        cartItems.forEach(item -> {
+        List<CartItem> itemsCopy = new ArrayList<>(cartItems);
+        itemsCopy.forEach(item -> {
             int quantity = item.getQuantity();
             Product product= item.getProduct();
             product.setQuantity(product.getQuantity()-quantity);
@@ -100,11 +103,84 @@ public class OrderServiceImpl implements OrderService{
             cartService.deleteProductFromCart(cart.getCartId(), product.getProductId());
         });
         //Send order summary
+        PaymentDTO paymentDTO = modelMapper.map(savedPayment, PaymentDTO.class);
         OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
+        orderDTO.setPaymentDTO(paymentDTO);
+        System.out.println(orderDTO);
         orderItems.forEach(orderItem -> {
-            orderDTO.getOrderItems().add(modelMapper.map(orderItem, OrderItemDTO.class));
+            Product  product = orderItem.getProduct();
+            ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+            OrderItemDTO orderItemDTO= modelMapper.map(orderItem, OrderItemDTO.class);
+            orderItemDTO.setProductDTO(productDTO);
+            orderDTO.getOrderItems().add(orderItemDTO);
         });
         orderDTO.setAddressId(addressId);
         return orderDTO;
     }
+
+//    @Override
+//    @Transactional
+//    public OrderDTO placeOrder(String emailId, Long addressId, String paymentMethod, String pgName, String pgPaymentId, String pgStatus, String pgResponseMessage) {
+//        Cart cart = cartRepository.findCartByEmail(emailId);
+//        if (cart == null) {
+//            throw new ResourceNotFoundException("Cart", "email", emailId);
+//        }
+//
+//        Address address = addressRepository.findById(addressId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
+//
+//        Order order = new Order();
+//        order.setEmail(emailId);
+//        order.setOrderDate(LocalDate.now());
+//        order.setTotalAmount(cart.getTotalPrice());
+//        order.setOrderStatus("Order Accepted !");
+//        order.setAddress(address);
+//
+//        Payment payment = new Payment(paymentMethod, pgPaymentId, pgStatus, pgResponseMessage, pgName);
+//        payment.setOrder(order);
+//        payment = paymentRepository.save(payment);
+//        order.setPayment(payment);
+//
+//        Order savedOrder = orderRepository.save(order);
+//
+//        List<CartItem> cartItems = cart.getCartItems();
+//        if (cartItems.isEmpty()) {
+//            throw new APIException("Cart is empty");
+//        }
+//
+//        List<OrderItem> orderItems = new ArrayList<>();
+//        for (CartItem cartItem : cartItems) {
+//            OrderItem orderItem = new OrderItem();
+//            orderItem.setProduct(cartItem.getProduct());
+//            orderItem.setQuantity(cartItem.getQuantity());
+//            orderItem.setDiscount(cartItem.getDiscount());
+//            orderItem.setOrderedProductPrice(cartItem.getProductPrice());
+//            orderItem.setOrder(savedOrder);
+//            orderItems.add(orderItem);
+//        }
+//
+//        orderItems = orderItemRepository.saveAll(orderItems);
+//
+//        List<CartItem> itemsCopy = new ArrayList<>(cartItems);
+//        itemsCopy.forEach(item -> {
+//            int quantity = item.getQuantity();
+//            Product product = item.getProduct();
+//
+//            // Reduce stock quantity
+//            product.setQuantity(product.getQuantity() - quantity);
+//
+//            // Save product back to the database
+//            productRepository.save(product);
+//
+//            // Remove items from cart
+//            cartService.deleteProductFromCart(cart.getCartId(), item.getProduct().getProductId());
+//        });
+//
+//        OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
+//        orderItems.forEach(item -> orderDTO.getOrderItems().add(modelMapper.map(item, OrderItemDTO.class)));
+//
+//        orderDTO.setAddressId(addressId);
+//
+//        return orderDTO;
+//    }
 }

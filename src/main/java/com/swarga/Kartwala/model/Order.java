@@ -26,9 +26,9 @@ public class Order {
     @Column(nullable = false)
     private String email;
 
-    @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     @NotNull(message = "Order items must not be null")
-    @Size(min = 1, message = "Order must have at least one item")
+//    @Size(min = 1, message = "Order must have at least one item")
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @NotNull(message = "Order date must not be null")

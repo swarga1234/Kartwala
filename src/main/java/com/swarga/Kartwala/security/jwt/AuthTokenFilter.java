@@ -71,6 +71,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 //        return path.startsWith("/h2-console") || path.equals("/favicon.ico");
 //    }
     private String parseJwt(HttpServletRequest request) {
-        return jwtUtils.getJwtFromCookies(request);
+        String jwtFromCookie= jwtUtils.getJwtFromCookies(request);
+        if(jwtFromCookie!=null)
+        {
+            return jwtFromCookie;
+        }
+        return jwtUtils.getJwtFromHeader(request);
     }
 }
